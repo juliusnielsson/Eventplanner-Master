@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,121 +7,60 @@ import {
   TouchableOpacity,
   Button,
 } from "react-native";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, updateProfile } from "firebase/auth";
 
+import { getDatabase, ref, push, set } from "firebase/database";
 
-function profileScreen({ navigation }) {
-    React.useLayoutEffect(() => {
-        navigation.setOptions({
-          headerRight: () => (
-            <Button
-              onPress={() => navigation.navigate("Edit Profile")}
-              title="Edit Profile"
-            />
-          ),
-        });
-      }, [navigation]);
-      
+const auth = getAuth();
 
+function updateProfilePage({navigation}) {
+  const [displayName, setDisplayName] = useState("");
+  const [photoURL, setPhotoURL] = useState("");
 
-  const auth = getAuth();
-  const handleLogOut = async () => {
-    await signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-      })
-      .catch((error) => {
-        // An error happened.
-      });
-  };
-  if (!getAuth().currentUser) {
-    return (
-      <View>
-        <Text>Not found</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <Image
-        style={styles.avatar}
-        source={{ uri: "https://bootdey.com/img/Content/avatar/avatar6.png" }}
-      />
-      <View style={styles.body}>
-        <View style={styles.bodyContent}>
-          <Text style={styles.name}>John Doe</Text>
-          <Text style={styles.info}>UX Designer / Mobile developer</Text>
-          <Text style={styles.description}>
-            Lorem ipsum dolor sit amet, saepe sapientem eu nam. Qui ne assum
-            electram expetendis, omittam deseruisse consequuntur ius an,
-          </Text>
-          <TouchableOpacity style={styles.buttonContainer} onPress={() => handleLogOut()}>
-            <Text>Log Out</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
+  const renderButton = () => {
+    return <Button onPress={() => handleSubmit()} title = "Update Profile" />; 
 }
 
+const handleSubmit = async () => {
+  handleSubmit(auth.currentUser, {
+    displayName: displayName, 
+    photoURL: photoURL
+  }).then(() => {
+    // Profile updated!
+  }).catch((error) => {
+    // An error occurred
+  });
+}
+return (
+  <View>
+    <Text style={styles.header}>New Event</Text>
+    <TextInput
+      placeholder="Display Name"
+      value={displayName}
+      onChangeText={(displayName) => setDisplayName(displayName)}
+      style={styles.inputField}
+    />
+    <TextInput
+      placeholder="ImageURL"
+      value={photoURL}
+      onChangeText={(photoURL) => setPhotoURL(photoURL)}
+      style={styles.inputField}
+    />
+    </View>
+)}
+
 const styles = StyleSheet.create({
+  error: {
+    color: "red",
+  },
+  inputField: {
+    borderWidth: 1,
+    margin: 10,
+    padding: 10,
+  },
   header: {
-    backgroundColor: "#00BFFF",
-    height: 100,
-  },
-  avatar: {
-    width: 130,
-    height: 130,
-    borderRadius: 63,
-    borderWidth: 4,
-    borderColor: "white",
-    marginBottom: 10,
-    alignSelf: "center",
-    position: "absolute",
-    marginTop: 1,
-  },
-  name: {
-    fontSize: 22,
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  body: {
-    marginTop: 40,
-  },
-  bodyContent: {
-    flex: 1,
-    alignItems: "center",
-    padding: 30,
-  },
-  name: {
-    fontSize: 28,
-    color: "#696969",
-    fontWeight: "600",
-    marginTop: 65,
-  },
-  info: {
-    fontSize: 16,
-    color: "#00BFFF",
-    marginTop: 20,
-  },
-  description: {
-    fontSize: 16,
-    color: "#696969",
-    marginTop: 20,
-    textAlign: "center",
-  },
-  buttonContainer: {
-    marginTop: 20,
-    height: 45,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-    width: 250,
-    borderRadius: 30,
-    backgroundColor: "#00BFFF",
+    fontSize: 40,
   },
 });
 
-export default profileScreen;
+export default updateProfilePage;
